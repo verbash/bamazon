@@ -27,98 +27,90 @@ function runList() {
               for (var i = 0; i < res.length; i++) {
                 console.log("Item Id: " + res[i].item_id + " || Product: " + res[i].product_name + " || Dept: " + res[i].department_name + " || Price: $" + res[i].price + " || Stock: "+ res[i].stock_quantity);
               }
-              runShopping();
+              runShopping(res);
     });
 };
 
+let myChosenItem;
+
 function runShopping() {
+  connection.query("SELECT * FROM products", function(err, results){
+    if (err) throw err;
         inquirer
-            .prompt ({
+            .prompt ([
+              {
                 name: "item",
                 type: "input",
-                message: "Please enter the Item ID you would like to purchase:",
-                
-
-            })
+                message: "Please enter the Item ID you would like to purchase:"
+              }
+          
+          ])
             .then (function(answer){
-                if 
-                
-
+              console.dir(answer);
+              myChosenItem = answer.item;
+              console.log(results[1].product_name);
+              howMany(results);
             })
+          });
+            };      
+    
 
+   function howMany(results) {
+
+    console.log("myChosenItem " + myChosenItem);
+    var myItemNum = parseInt(myChosenItem);
+    var myItemNum1 = myItemNum - 1;
+    console.log("Item Id: " + results[myItemNum1].item_id + " || Product: " + results[myItemNum1].product_name + " || Dept: " + results[myItemNum1].department_name + " || Price: $" + results[myItemNum1].price + " || Stock: "+ results[myItemNum1].stock_quantity);
+    connection.query("SELECT * FROM products", function(err, res){
+          if (err) throw err;
+              inquirer
+                  .prompt ([
+        {
+          name: "amount",
+          type: "input",
+          message: "How many would you like?",
+          validate: function(value) {
+            if (isNaN(value) === false) {
+              return true;
+            }
+            return false;
+          }
+        } ])
+
+
+    .then (function(wantAmount){
+      var quantity = parseInt(wantAmount.amount);
+      var product = results[myItemNum1];
+    console.log("Let's see if we have " + quantity + "...");
+       
+
+      if (quantity > product.stock_quantity ) {
+        console.log ("\n Insufficient Quantity!");
+      } else {
+
+        makePurchase(product, quantity);
+
+      };
+    
+  })
+});
+  }; 
+
+function makePurchase(product, quantity) {
+  connection.query(
+    "UPDATE products SET stock_quantity = stock_quantity - ? WHERE item_id = ?",
+    [quantity, product.item_id],
+    function(err, res) {
+      console.log("\nSuccessfully purchased " + quantity + " " + product.product_name + "'s!");
+      runList();
+    }
+
+  );
 };
-
-//     inquirer
-//       .prompt({
-//         name: "action",
-//         type: "list",
-//         message: "welcome to the Store, how can I help you today?",
-//         choices: [
-//           "Browse All Products",
-//           "Browse Products by Department",
-//           "Enter a 3-digit Item Id",
-//           "Check Out",
-//           "exit"
-//         ]
-//       })
-//       .then(function(answer) {
-//         switch (answer.action) {
-//         case "Browse All Products":
-//           browseProduct();
-//           break;
-  
-//         case "Browse Products by Department":
-//           browseDepartment();
-//           break;
-  
-//         case "Enter a 3-digit Item Id":
-//           enterItemId();
-//           break;
-  
-//         case "Check Out":
-//           checkOut();
-//           break;
-            
-//         case "exit":
-//           connection.end();
-//           break;
-//         }
-//       });
-//   };
-
-//   function browseProduct() {
-//     inquirer
-//       .prompt({
-//         name: "product",
-//         type: "list",
-//         message: "Please choose from our products",
-//         choices: [
-            
-
-//         ]
-//     })
-//       .then(function(answer) {
-//         var query = "SELECT item_id, product_name, department_name, price, stock_quantity FROM products WHERE ?";
-//         connection.query(query, { product: answer.product }, function(err, res) {
-//           for (var i = 0; i < res.length; i++) {
-//             console.log("Item Id: " + res[i].item_id + " || Product: " + res[i].product_name + " || Dept: " + res[i].department_name + " || Price: $" + res[i].price + "stock_quantity: "+ res[i].stock_quantitiy);
-//           }
-//           runShopping();
-//         });
-//       });
-//   }
-
-// function browseDepartment() {
+ 
 
 
-// };
 
-// function enterItemId() {
+           
+        
 
-
-// };
-
-// function checkOut() {
-
-
-// };
